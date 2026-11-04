@@ -236,6 +236,8 @@ void hysteria2Construct(
     const std::string &underlying_proxy
 ) {
     commonConstruct(node, ProxyType::Hysteria2, group, remarks, server, port, udp, tfo, scv, tribool(), underlying_proxy);
+    node.Up = up;
+    node.Down = down;
     node.UpSpeed = to_int(up);
     node.DownSpeed = to_int(down);
     node.Ports = ports;

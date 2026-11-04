@@ -541,9 +541,9 @@ void proxyToClash(std::vector<Proxy> &nodes, YAML::Node &yamlnode, const ProxyGr
             if (!x.Mport.empty())
                 singleproxy["mport"] = x.Mport;
             if (!x.Up.empty())
-                singleproxy["up"] = x.UpSpeed;
+                singleproxy["up"] = x.Up;
             if (!x.Down.empty())
-                singleproxy["down"] = x.DownSpeed;
+                singleproxy["down"] = x.Down;
             if (!x.Password.empty())
                 singleproxy["password"] = x.Password;
             if (!x.OBFS.empty())
@@ -552,6 +552,8 @@ void proxyToClash(std::vector<Proxy> &nodes, YAML::Node &yamlnode, const ProxyGr
                 singleproxy["obfs-password"] = x.OBFSParam;
             if (!x.SNI.empty())
                 singleproxy["sni"] = x.SNI;
+            if (!x.Fingerprint.empty())
+                singleproxy["fingerprint"] = x.Fingerprint;
             if (!scv.is_undef())
                 singleproxy["skip-cert-verify"] = scv.get();
             if (!x.Alpn.empty())
@@ -617,7 +619,9 @@ void proxyToClash(std::vector<Proxy> &nodes, YAML::Node &yamlnode, const ProxyGr
             break;
         case ProxyType::VLESS:
             singleproxy["type"] = "vless";
-            singleproxy["tls"] = true;
+            singleproxy["network"] = x.TransferProtocol.empty() ? "tcp" : x.TransferProtocol;
+            singleproxy["tls"] = x.TLSSecure;
+            singleproxy["encryption"] = x.VlessEncryption;
             // Output packet-encoding, xudp, packet-addr only if explicitly set
             if (!x.PacketEncoding.empty())
                 singleproxy["packet-encoding"] = x.PacketEncoding;
@@ -689,6 +693,8 @@ void proxyToClash(std::vector<Proxy> &nodes, YAML::Node &yamlnode, const ProxyGr
 
             if (!x.Fingerprint.empty())
                 singleproxy["fingerprint"] = x.Fingerprint;
+            if (!x.ClientFingerprint.empty())
+                singleproxy["client-fingerprint"] = x.ClientFingerprint;
             if (x.XTLS == 2) {
                 singleproxy["flow"] = "xtls-rprx-vision";
             } else if (!x.FlowSet.is_undef() && x.FlowSet.get()) {
@@ -701,11 +707,9 @@ void proxyToClash(std::vector<Proxy> &nodes, YAML::Node &yamlnode, const ProxyGr
             if (!x.PublicKey.empty()) {
                 singleproxy["reality-opts"]["public-key"] = x.PublicKey;
                 singleproxy["reality-opts"]["short-id"] = x.ShortID;
-                if (!x.ClientFingerprint.empty()) {
-                    singleproxy["client-fingerprint"] = x.ClientFingerprint;
-                } else if (!x.Fingerprint.empty()) {
+                if (x.ClientFingerprint.empty() && !x.Fingerprint.empty()) {
                     singleproxy["client-fingerprint"] = x.Fingerprint;
-                } else {
+                } else if (x.ClientFingerprint.empty()) {
                     singleproxy["client-fingerprint"] = "random";
                 }
             }
